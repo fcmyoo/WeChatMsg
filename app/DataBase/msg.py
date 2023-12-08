@@ -70,6 +70,24 @@ class Msg:
         result.sort(key=lambda x: x[5])
         return result
 
+    def get_messages_lee(self, username_):
+        if not self.open_flag:
+            return None
+        sql = '''
+               select localId, IsSender, StrContent, StrTalker, Sequence, Type, SubType,strftime('%Y-%m-%d %H:%M:%S',CreateTime,'unixepoch','localtime') as CreateTime,MsgSvrID,DisplayContent,CompressContent,BytesExtra
+               from MSG
+               where StrTalker=?
+               order by CreateTime desc
+           '''
+        try:
+            lock.acquire(True)
+            self.cursor.execute(sql, [username_])
+            result = self.cursor.fetchall()
+        finally:
+            lock.release()
+        result.sort(key=lambda x: x[5])
+        return result
+
     def get_messages_all(self):
         sql = '''
             select localId,TalkerId,Type,SubType,IsSender,CreateTime,Status,StrContent,strftime('%Y-%m-%d %H:%M:%S',CreateTime,'unixepoch','localtime') as StrTime,MsgSvrID,BytesExtra,StrTalker,Reserved1
